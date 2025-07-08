@@ -1,0 +1,187 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+const AuthContext = createContext();
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(() => {
+    const stored = localStorage.getItem('user');
+    return stored ? JSON.parse(stored) : null;
+  });
+  const [token, setToken] = useState(() => localStorage.getItem('authToken') || null);
+  const [refreshToken, setRefreshToken] = useState(() => localStorage.getItem('refreshToken') || null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check for existing token on mount
+    const savedToken = localStorage.getItem('authToken');
+    const savedRefreshToken = localStorage.getItem('refreshToken');
+    const savedUserString = localStorage.getItem('user'); // Renamed for clarity
+    
+    if (savedToken && savedUserString && savedRefreshToken) {
+      try {
+        const savedUser = JSON.parse(savedUserString); // This should now include email and number
+        setToken(savedToken);
+        setRefreshToken(savedRefreshToken);
+        setUser(savedUser);
+      } catch (error) {
+        console.error('Error parsing saved user:', error);
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+      }
+    }
+    setLoading(false);
+  }, []);
+
+  const login = async (param1, param2, refreshTokenFromLogin) => {
+    // param1 can be username (string) or user object (from OAuth)
+    // param2 can be password (string) or accessToken (string from OAuth)
+    // refreshTokenFromLogin is the refresh token from either login type
+    try {
+      let authToken;
+      let userData;
+      let newRefreshToken;
+
+      if (typeof param1 === 'object' && param1 !== null && typeof param2 === 'string') {
+        // This is an OAuth login
+        // param1 is the user object from GoogleAuthController
+        // param2 is the accessToken from GoogleAuthController
+        // console.log('AuthContext: Handling OAuth login');
+        userData = param1;
+        authToken = param2;
+        newRefreshToken = refreshTokenFromLogin; // Passed from OAuth handler
+        
+        // No API call needed here as authentication was done by the backend's OAuth2 callback
+        if (!userData || !authToken || !newRefreshToken) {
+            throw new Error('OAuth login data is incomplete.');
+        }
+
+      } else if (typeof param1 === 'string' && typeof param2 === 'string') {
+        // This is a traditional username/password login
+        // console.log('AuthContext: Handling username/password login');
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/public/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username: param1, password: param2 }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: 'Login failed' }));
+          throw new Error(errorData.message || 'Login failed');
+        }
+
+        const data = await response.json();
+        authToken = data.accessToken;
+        userData = data.user;
+        newRefreshToken = data.refreshToken;
+
+        if (!userData || !authToken || !newRefreshToken) {
+            throw new Error('Standard login data is incomplete.');
+        }
+      } else {
+        throw new Error('Invalid login parameters');
+      }
+
+      // Store in localStorage
+      localStorage.setItem('authToken', authToken);
+      localStorage.setItem('refreshToken', newRefreshToken);
+      localStorage.setItem('user', JSON.stringify(userData));
+
+      // Update state
+      setToken(authToken);
+      setRefreshToken(newRefreshToken);
+      setUser(userData);
+
+      // Navigate based on role
+      if (userData.role === 'ADMIN') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/user/dashboard');
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Login error:', error);
+      // Clear any partial auth state if login fails
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      setToken(null);
+      setRefreshToken(null);
+      setUser(null);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const register = async (name, username, password, number) => { // Add number parameter
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/public/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, username, password, number, role: 'USER' }), // Include number
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Registration failed');
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Registration error:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const logout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+    setToken(null);
+    setRefreshToken(null);
+    setUser(null);
+    navigate('/login');
+  };
+
+  const updateUserContext = (updates) => {
+    const updatedUser = { ...user, ...updates }; // This will merge new fields like email, number
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+  };
+
+  const isAuthenticated = () => {
+    return !!token && !!user;
+  };
+
+  const value = {
+    user,
+    token,
+    refreshToken,
+    loading,
+    login,
+    register,
+    logout,
+    updateUserContext,
+    isAuthenticated,
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
