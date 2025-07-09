@@ -10,6 +10,7 @@ import { Eye, EyeOff } from 'lucide-react';
 export default function RegisterForm() {
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -33,7 +34,7 @@ export default function RegisterForm() {
     setLoading(true);
 
     // Validation
-    if (!name || !username || !password || !confirmPassword || !number) { // Add number to check
+    if (!name || !username || !email || !password || !confirmPassword || !number) { // Add email and number to check
       setError('Please fill in all fields');
       setLoading(false);
       return;
@@ -57,10 +58,10 @@ export default function RegisterForm() {
       return;
     }
 
-    const result = await register(name, username, password, parseInt(number, 10)); // Pass number
+    const result = await register(name, username, email, password, number); // Pass email and number
     
     if (result.success) {
-      navigate('/login?registered=true');
+      navigate(`/login?registered=true&message=${encodeURIComponent(result.message)}`);
     } else {
       setError(result.error);
     }
@@ -91,6 +92,18 @@ export default function RegisterForm() {
           onChange={(e) => setUsername(e.target.value)}
           required
           placeholder="Choose a username"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="email">Email</Label>
+        <InputField
+          type="email"
+          id="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          placeholder="Enter your email address"
         />
       </div>
 

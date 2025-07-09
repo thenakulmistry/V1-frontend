@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 { /* Importing auth pages */ }
 import LoginPage from '@/pages/public/LoginPage';
 import RegisterPage from '@/pages/public/RegisterPage';
+import EmailVerificationPage from '@/pages/public/EmailVerificationPage'
 import ForgotPasswordPage from '@/pages/public/ForgotPasswordPage';
 import ResetPasswordPage from '@/pages/public/ResetPasswordPage';
 import OAuth2RedirectHandlerPage from '@/pages/public/OAuth2RedirectHandlerPage';
@@ -67,6 +68,7 @@ function App() {
               <Route path="register" element={<RegisterPage />} />
               <Route path="forgot-password" element={<ForgotPasswordPage />} />
               <Route path="reset-password" element={<ResetPasswordPage />} />
+              <Route path="verify-email" element={<EmailVerificationPage />} />
             </Route>
 
             {/* OAuth2 Redirect Handler Route */}

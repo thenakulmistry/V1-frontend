@@ -78,7 +78,9 @@ export const AuthProvider = ({ children }) => {
         });
 
         if (!response.ok) {
+          // This line will now succeed because the backend sends JSON
           const errorData = await response.json().catch(() => ({ message: 'Login failed' }));
+          // errorData will be { message: "Invalid username or password" } or similar
           throw new Error(errorData.message || 'Login failed');
         }
 
@@ -125,22 +127,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (name, username, password, number) => { // Add number parameter
+  const register = async (name, username, email, password, number) => { // Add email parameter
     try {
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/public/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, username, password, number, role: 'USER' }), // Include number
+        body: JSON.stringify({ name, username, email, password, number, role: 'USER' }), // Include email and number
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Registration failed');
+        throw new Error(data.message || 'Registration failed');
       }
 
-      return { success: true };
+      return { success: true, message: data.message };
     } catch (error) {
       console.error('Registration error:', error);
       return { success: false, error: error.message };
