@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Button from '@/components/common/Button';
 import InputField from '@/components/common/InputField'; // Assuming you'll use InputField
 import Label from '@/components/common/Label'; // Assuming you'll use Label
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader } from 'lucide-react';
 
 export default function RegisterForm() {
   const [name, setName] = useState('');
@@ -175,7 +175,14 @@ export default function RegisterForm() {
       )}
 
       <Button type="submit" disabled={loading} className="w-full">
-        {loading ? 'Creating account...' : 'Create account'}
+        {loading ? (
+          <span className="flex items-center justify-center">
+            <Loader className="mr-2 h-4 w-4 animate-spin" />
+            Creating account...
+          </span>
+        ) : (
+          'Create account'
+        )}
       </Button>
     </form>
   );

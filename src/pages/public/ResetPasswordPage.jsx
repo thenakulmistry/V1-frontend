@@ -3,6 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import Button from '@/components/common/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/common/Card';
 import Label from '@/components/common/Label';
+import apiClient from '@/services/apiClient';
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
@@ -44,21 +45,16 @@ export default function ResetPasswordPage() {
     setError('');
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/public/reset-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, password }),
-      });
+      const response = await apiClient.post('/public/reset-password', { token, password });
+      const data = response.data;
 
-      const data = await response.json();
-
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error(data.message || 'An error occurred.');
       }
 
       setMessage(data.message);
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || err.message);
     } finally {
       setLoading(false);
     }

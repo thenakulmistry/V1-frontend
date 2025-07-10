@@ -8,6 +8,7 @@ import EditUserModal from '@/components/admin/EditUserModal';
 import AddAdminModal from '@/components/admin/AddAdminModal'; // Import AddAdminModal
 import ConfirmationModal from '@/components/common/ConfirmationModal';
 import Notification from '@/components/common/Notification';
+import apiClient from '@/services/apiClient';
 
 export default function ManageUsersPage() {
   const { token, user: adminUser } = useAuth();
@@ -31,18 +32,11 @@ export default function ManageUsersPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/users`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error(`Failed to fetch users: ${response.statusText}`);
-      }
-      const data = await response.json();
+      const response = await apiClient.get('/admin/users');
+      const data = response.data;
       setUsers(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || err.message);
       console.error(err);
     } finally {
       setLoading(false);
@@ -61,20 +55,11 @@ export default function ManageUsersPage() {
   const confirmDeleteUser = async () => {
     if (!userToDelete) return;
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/user/${userToDelete.username}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(`Failed to delete user: ${errorData || response.statusText}`);
-      }
+      await apiClient.delete(`/admin/user/${userToDelete.username}`);
       setNotification({ show: true, message: 'User deleted successfully.', type: 'success' });
       fetchUsers(); // Refresh the list
     } catch (err) {
-      setNotification({ show: true, message: `Error deleting user: ${err.message}`, type: 'error' });
+      setNotification({ show: true, message: `Error deleting user: ${err.response?.data?.message || err.message}`, type: 'error' });
       console.error(err);
     } finally {
       setIsConfirmModalOpen(false);
@@ -102,24 +87,13 @@ export default function ManageUsersPage() {
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/user/${usernameToUpdate}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedData),
-      });
-      if (!response.ok) {
-        const errorResult = await response.json().catch(() => ({ message: 'Update failed' }));
-        throw new Error(errorResult.message || `Failed to update user: ${response.statusText}`);
-      }
+      await apiClient.put(`/admin/user/${usernameToUpdate}`, updatedData);
       setNotification({ show: true, message: 'User updated successfully.', type: 'success' });
       fetchUsers(); // Refresh the list
       return { success: true };
     } catch (err) {
       console.error('Error updating user:', err);
-      return { success: false, error: err.message };
+      return { success: false, error: err.response?.data?.message || err.message };
     }
   };
 
@@ -133,31 +107,13 @@ export default function ManageUsersPage() {
 
   const handleAddAdminSubmit = async (adminData) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/add_admin`, { // Endpoint for adding admin
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(adminData), // UserDTO for new admin
-      });
-      if (!response.ok) {
-        // Try to parse error message from backend if available
-        let errorMsg = `Failed to add admin: ${response.statusText}`;
-        try {
-            const errorResult = await response.json();
-            errorMsg = errorResult.message || errorMsg;
-        } catch (e) {
-            // Ignore if response is not JSON
-        }
-        throw new Error(errorMsg);
-      }
+      await apiClient.post('/admin/add_admin', adminData);
       setNotification({ show: true, message: 'Admin added successfully.', type: 'success' });
       fetchUsers(); // Refresh the user list
       return { success: true };
     } catch (err) {
       console.error('Error adding admin:', err);
-      return { success: false, error: err.message };
+      return { success: false, error: err.response?.data?.message || err.message };
     }
   };
 

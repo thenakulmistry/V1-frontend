@@ -6,6 +6,7 @@ import Button from '@/components/common/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/common/Card';
 import AddItemModal from '@/components/admin/AddItemModal';
 import EditItemModal from '@/components/admin/EditItemModal';
+import apiClient from '@/services/apiClient';
 
 // Simplified Helper to normalize MongoDB ObjectId
 const normalizeId = (id) => {
@@ -45,15 +46,12 @@ export default function ManageItemsPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/items`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-      if (!response.ok) throw new Error(`Failed to fetch items: ${response.statusText}`);
-      let data = await response.json();
+      const response = await apiClient.get('/admin/items');
+      let data = response.data;
       data = Array.isArray(data) ? data.map(item => ({ ...item, id: normalizeId(item.id) })) : [];
       setItems(data);
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || err.message);
       console.error(err);
     } finally {
       setLoading(false);
@@ -94,24 +92,13 @@ export default function ManageItemsPage() {
 
   const handleAddItemSubmit = async (itemData) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/item`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(itemData),
-      });
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({ message: 'Failed to add item' }));
-        throw new Error(errData.message || response.statusText);
-      }
+      await apiClient.post('/admin/item', itemData);
       alert('Item added successfully.');
       fetchItems();
       return { success: true };
     } catch (err) {
       console.error('Error adding item:', err);
-      return { success: false, error: err.message };
+      return { success: false, error: err.response?.data?.message || err.message };
     }
   };
 
@@ -122,42 +109,24 @@ export default function ManageItemsPage() {
 
   const handleEditItemSubmit = async (itemId, itemData) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/item/${itemId}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(itemData),
-      });
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({ message: 'Failed to update item' }));
-        throw new Error(errData.message || response.statusText);
-      }
+      await apiClient.put(`/admin/item/${itemId}`, itemData);
       alert('Item updated successfully.');
       fetchItems();
       return { success: true };
     } catch (err) {
       console.error('Error updating item:', err);
-      return { success: false, error: err.message };
+      return { success: false, error: err.response?.data?.message || err.message };
     }
   };
 
   const handleDeleteItem = async (itemId, itemName) => {
     if (!confirm(`Are you sure you want to delete item "${itemName}"?`)) return;
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/item/${itemId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-      if (!response.ok) {
-        const errData = await response.text();
-        throw new Error(errData || response.statusText);
-      }
+      await apiClient.delete(`/admin/item/${itemId}`);
       alert('Item deleted successfully.');
       fetchItems();
     } catch (err) {
-      alert(`Error deleting item: ${err.message}`);
+      alert(`Error deleting item: ${err.response?.data?.message || err.message}`);
       console.error(err);
     }
   };

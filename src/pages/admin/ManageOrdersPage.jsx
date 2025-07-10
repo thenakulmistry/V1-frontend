@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/common/Ca
 import EditOrderDetailsModal from '@/components/admin/EditOrderDetailsModal'; // Renamed import
 import OrderDetailsModal from '@/components/admin/OrderDetailsModal'; // Import the new modal
 import Notification from '@/components/common/Notification';
+import apiClient from '@/services/apiClient';
 
 // Helper to normalize MongoDB ObjectId (consistent with other pages)
 const normalizeId = (id) => {
@@ -102,14 +103,8 @@ export default function ManageOrdersPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/orders`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to fetch orders: ${response.statusText} - ${errorText}`);
-      }
-      let data = await response.json();
+      const response = await apiClient.get('/admin/orders');
+      let data = response.data;
       // Normalize IDs, parse dates, ensure status, and use username
       data = Array.isArray(data) ? data.map(order => ({ 
         ...order, 
@@ -135,7 +130,7 @@ export default function ManageOrdersPage() {
       
       setOrders(data);
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || err.message);
       console.error(err);
     } finally {
       setLoading(false);
@@ -149,24 +144,13 @@ export default function ManageOrdersPage() {
 
   const handleEditOrderSubmit = async (orderId, orderData) => { // Renamed and updated handler
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/order/${orderId}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderData), // Send the full OrderDTO
-      });
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to update order: ${errorText || response.statusText}`);
-      }
+      await apiClient.put(`/admin/order/${orderId}`, orderData);
       setNotification({ show: true, message: 'Order updated successfully.', type: 'success' });
       fetchOrders(); // Refresh the list
       return { success: true };
     } catch (err) {
       console.error('Error updating order:', err);
-      setNotification({ show: true, message: `Error updating order: ${err.message}`, type: 'error' });
+      setNotification({ show: true, message: `Error updating order: ${err.response?.data?.message || err.message}`, type: 'error' });
       return { success: false, error: err.message };
     }
   };

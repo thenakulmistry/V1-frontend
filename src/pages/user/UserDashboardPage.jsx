@@ -3,6 +3,7 @@ import { useOutletContext } from 'react-router-dom'; // Added useOutletContext
 import { Package, Plus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Button from '@/components/common/Button';
+import apiClient from '@/services/apiClient';
 
 export default function UserDashboardPage() {
   const { user, token, logout } = useAuth();
@@ -57,24 +58,19 @@ export default function UserDashboardPage() {
   // Normalize all fetched items' ids to string immediately after fetch
   const fetchItems = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/user/items`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await apiClient.get('/user/items');
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error('Failed to fetch items');
       }
 
-      let data = await response.json();
+      let data = response.data;
       // Normalize all ids to string
       data = Array.isArray(data) ? data.map(item => ({ ...item, id: normalizeId(item.id) })) : [];
       setItems(data);
     } catch (error) {
       console.error('Error fetching items:', error);
-      setError(error.message);
+      setError(error.message || 'Failed to fetch items');
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import apiClient from '@/services/apiClient'; // Import apiClient
 
 const AuthContext = createContext();
 
@@ -69,22 +70,9 @@ export const AuthProvider = ({ children }) => {
       } else if (typeof param1 === 'string' && typeof param2 === 'string') {
         // This is a traditional username/password login
         // console.log('AuthContext: Handling username/password login');
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/public/login`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ username: param1, password: param2 }),
-        });
+        const response = await apiClient.post('/public/login', { username: param1, password: param2 });
 
-        if (!response.ok) {
-          // This line will now succeed because the backend sends JSON
-          const errorData = await response.json().catch(() => ({ message: 'Login failed' }));
-          // errorData will be { message: "Invalid username or password" } or similar
-          throw new Error(errorData.message || 'Login failed');
-        }
-
-        const data = await response.json();
+        const data = response.data;
         authToken = data.accessToken;
         userData = data.user;
         newRefreshToken = data.refreshToken;
@@ -123,30 +111,21 @@ export const AuthProvider = ({ children }) => {
       setToken(null);
       setRefreshToken(null);
       setUser(null);
-      return { success: false, error: error.message };
+      const errorMessage = error.response?.data?.message || error.message;
+      return { success: false, error: errorMessage };
     }
   };
 
   const register = async (name, username, email, password, number) => { // Add email parameter
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/public/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, username, email, password, number, role: 'USER' }), // Include email and number
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
-      }
+      const response = await apiClient.post('/public/register', { name, username, email, password, number, role: 'USER' });
+      const data = response.data;
 
       return { success: true, message: data.message };
     } catch (error) {
       console.error('Registration error:', error);
-      return { success: false, error: error.message };
+      const errorMessage = error.response?.data?.message || error.message;
+      return { success: false, error: errorMessage };
     }
   };
 

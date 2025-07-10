@@ -4,6 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/common/Ca
 import Button from '@/components/common/Button';
 import bgImage from '@/assets/bg9.jpg';
 import { CheckCircle, XCircle, Loader } from 'lucide-react';
+import apiClient from '@/services/apiClient';
 
 export default function EmailVerificationPage() {
   const [searchParams] = useSearchParams();
@@ -21,13 +22,11 @@ export default function EmailVerificationPage() {
 
     const verifyToken = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/public/verify-email?token=${token}`, {
-          method: 'POST',
-        });
+        const response = await apiClient.post(`/public/verify-email?token=${token}`);
         
-        const data = await response.json();
+        const data = response.data;
 
-        if (!response.ok) {
+        if (response.status !== 200) {
           throw new Error(data.message || 'Verification failed.');
         }
 
@@ -35,7 +34,7 @@ export default function EmailVerificationPage() {
         setMessage(data.message);
       } catch (error) {
         setStatus('error');
-        setMessage(error.message || 'An error occurred during verification.');
+        setMessage(error.response?.data?.message || error.message || 'An error occurred during verification.');
       }
     };
 

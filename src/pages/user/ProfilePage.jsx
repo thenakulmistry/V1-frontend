@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/common/Ca
 import EditProfileModal from '@/components/user/EditProfileModal'; // Import the modal
 import ConfirmationModal from '@/components/common/ConfirmationModal'; // Import ConfirmationModal
 import Notification from '@/components/common/Notification'; // Import Notification
+import apiClient from '@/services/apiClient';
 
 // Helper to normalize MongoDB ObjectId (if needed for other parts, or if order.id isn't already a string)
 const normalizeId = (id) => {
@@ -99,25 +100,11 @@ export default function ProfilePage() {
 
   const fetchOrders = async () => {
     setLoadingOrders(true);
+    setErrorOrders(null); // Reset error state on new fetch
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/user/orders`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await apiClient.get('/user/orders');
 
-      if (response.status === 404) {
-        setOrders([]);
-        setErrorOrders(null);
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch orders');
-      }
-
-      let data = await response.json();
+      let data = response.data;
       // Normalize IDs, parse dates, and ensure 'people' field is handled
       data = Array.isArray(data) ? data.map(order => ({ 
         ...order, 
@@ -135,10 +122,14 @@ export default function ProfilePage() {
       });
 
       setOrders(data);
-      setErrorOrders(null);
     } catch (error) {
       console.error('Error fetching orders:', error);
-      setErrorOrders(error.message);
+      if (error.response && error.response.status === 404) {
+        // Handle 404 Not Found as "no orders" instead of an error
+        setOrders([]);
+      } else {
+        setErrorOrders(error.response?.data?.message || error.message);
+      }
     } finally {
       setLoadingOrders(false);
     }
@@ -175,25 +166,13 @@ export default function ProfilePage() {
     };
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/user/orders/update/${orderToCancel.id}`, { // Updated URL
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Failed to cancel order' }));
-        throw new Error(errorData.message || 'Failed to cancel order');
-      }
+      await apiClient.put(`/user/orders/update/${orderToCancel.id}`, payload);
 
       setNotification({ show: true, message: 'Order cancelled successfully!', type: 'success' });
       fetchOrders(); // Refresh the orders list
     } catch (error) {
       console.error('Error cancelling order:', error);
-      setNotification({ show: true, message: `Failed to cancel order: ${error.message}`, type: 'error' });
+      setNotification({ show: true, message: `Failed to cancel order: ${error.response?.data?.message || error.message}`, type: 'error' });
     } finally {
       setIsConfirmModalOpen(false);
       setOrderToCancel(null);

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'; // Import Link
 import { useAuth } from '@/contexts/AuthContext';
 import { Users, Package, ShoppingBag } from 'lucide-react';
 import Button from '@/components/common/Button';
+import apiClient from '@/services/apiClient';
 
 export default function AdminDashboardPage() {
   const { user, token, logout } = useAuth();
@@ -22,41 +23,23 @@ export default function AdminDashboardPage() {
 
   const fetchStats = async () => {
     try {
-      // Fetch users count
-      const usersResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/users`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      // Fetch users, items, and orders counts in parallel
+      const [usersResponse, itemsResponse, ordersResponse] = await Promise.all([
+        apiClient.get('/admin/users'),
+        apiClient.get('/admin/items'),
+        apiClient.get('/admin/orders')
+      ]);
+
+      const users = usersResponse.data;
+      const items = itemsResponse.data;
+      const orders = ordersResponse.data;
       
-      // Fetch items count
-      const itemsResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/items`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      // Fetch orders count
-      const ordersResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/admin/orders`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+      setStats({
+        totalUsers: Array.isArray(users) ? users.length : 0,
+        totalItems: Array.isArray(items) ? items.length : 0,
+        totalOrders: Array.isArray(orders) ? orders.length : 0
       });
 
-      if (usersResponse.ok && itemsResponse.ok && ordersResponse.ok) {
-        const users = await usersResponse.json();
-        const items = await itemsResponse.json();
-        const orders = await ordersResponse.json();
-        
-        setStats({
-          totalUsers: Array.isArray(users) ? users.length : 0,
-          totalItems: Array.isArray(items) ? items.length : 0,
-          totalOrders: Array.isArray(orders) ? orders.length : 0
-        });
-      }
     } catch (error) {
       console.error('Error fetching stats:', error);
     } finally {

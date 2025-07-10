@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import Button from '@/components/common/Button';
 import InputField from '@/components/common/InputField';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/common/Card';
+import { Loader } from 'lucide-react';
+import apiClient from '@/services/apiClient';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -17,21 +19,16 @@ export default function ForgotPasswordPage() {
     setError('');
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/public/forgot-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
+      const response = await apiClient.post('/public/forgot-password', { email });
+      const data = response.data;
 
-      const data = await response.json();
-
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error(data.message || 'An error occurred.');
       }
 
       setMessage(data.message);
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || err.message);
     } finally {
       setLoading(false);
     }
@@ -59,7 +56,14 @@ export default function ForgotPasswordPage() {
           {message && <p className="text-sm text-green-800 bg-green-500/20 border border-green-500/30 text-center p-3 rounded-md">{message}</p>}
           {error && <p className="text-sm text-red-800 bg-red-500/20 border border-red-500/30 text-center p-3 rounded-md">{error}</p>}
           <Button type="submit" disabled={loading} className="w-full">
-            {loading ? 'Sending...' : 'Send Reset Link'}
+            {loading ? (
+              <span className="flex items-center justify-center">
+                <Loader className="mr-2 h-4 w-4 animate-spin" />
+                Sending...
+              </span>
+            ) : (
+              'Send Reset Link'
+            )}
           </Button>
         </form>
         <div className="mt-6 text-center text-sm text-stone-600">
