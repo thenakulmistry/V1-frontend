@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (param1, param2, refreshTokenFromLogin) => {
-    // param1 can be username (string) or user object (from OAuth)
+    // param1 can be usernameOrEmail (string) or user object (from OAuth)
     // param2 can be password (string) or accessToken (string from OAuth)
     // refreshTokenFromLogin is the refresh token from either login type
     try {
@@ -68,9 +68,9 @@ export const AuthProvider = ({ children }) => {
         }
 
       } else if (typeof param1 === 'string' && typeof param2 === 'string') {
-        // This is a traditional username/password login
-        // console.log('AuthContext: Handling username/password login');
-        const response = await apiClient.post('/public/login', { username: param1, password: param2 });
+        // This is a traditional username/email and password login
+        // console.log('AuthContext: Handling username/email and password login');
+        const response = await apiClient.post('/public/login', { usernameOrEmail: param1, password: param2 });
 
         const data = response.data;
         authToken = data.accessToken;

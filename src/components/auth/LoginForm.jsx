@@ -12,7 +12,7 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID; // Corrected thi
 const REDIRECT_URI = `${window.location.origin}/oauth2/redirect`;
 
 export default function LoginForm() {
-  const [username, setUsername] = useState('');
+  const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -24,13 +24,13 @@ export default function LoginForm() {
     setError('');
     setLoading(true);
 
-    if (!username || !password) {
+    if (!usernameOrEmail || !password) {
       setError('Please fill in all fields');
       setLoading(false);
       return;
     }
 
-    const result = await login(username, password);
+    const result = await login(usernameOrEmail, password);
     
     if (!result.success) {
       setError(result.error);
@@ -53,13 +53,13 @@ export default function LoginForm() {
     <div className="space-y-6">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <Label htmlFor="username">Username</Label>
+          <Label htmlFor="usernameOrEmail">Username or Email</Label>
           <InputField
-            id="username"
+            id="usernameOrEmail"
             type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Enter your username"
+            value={usernameOrEmail}
+            onChange={(e) => setUsernameOrEmail(e.target.value)}
+            placeholder="Enter your username or email"
             required
           />
         </div>

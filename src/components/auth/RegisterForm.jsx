@@ -40,6 +40,12 @@ export default function RegisterForm() {
       return;
     }
 
+    if (username.includes('@')) {
+      setError('Username cannot contain the "@" symbol.');
+      setLoading(false);
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       setLoading(false);
