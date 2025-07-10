@@ -9,7 +9,7 @@ import Label from '@/components/common/Label';
 // Ensure VITE_GOOGLE_CLIENT_ID is set in your .env file (e.g., .env.local)
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID; // Corrected this line
 // The redirect URI must match exactly what you've configured in your Google Cloud Console
-const REDIRECT_URI = `${window.location.origin}/oauth2/redirect`;
+const REDIRECT_URI = 'https://www.gauricooks.com/oauth2/redirect';
 
 export default function LoginForm() {
   const [usernameOrEmail, setUsernameOrEmail] = useState('');
