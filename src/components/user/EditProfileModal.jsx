@@ -3,6 +3,7 @@ import Button from '@/components/common/Button';
 import InputField from '@/components/common/InputField';
 import Label from '@/components/common/Label';
 import { X } from 'lucide-react';
+import apiClient from '@/services/apiClient'; // Import apiClient
 
 export default function EditProfileModal({ user, isOpen, onClose, onSubmit }) {
   const [formData, setFormData] = useState({
@@ -10,6 +11,11 @@ export default function EditProfileModal({ user, isOpen, onClose, onSubmit }) {
     username: '',
     email: '',
     number: '',
+  });
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmNewPassword: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,6 +28,7 @@ export default function EditProfileModal({ user, isOpen, onClose, onSubmit }) {
         email: user.email || '',
         number: user.number ? String(user.number) : '', // Ensure number is string for input field
       });
+      setPasswordData({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
       setError(''); // Clear previous errors when modal opens
     }
   }, [user, isOpen]);
@@ -40,41 +47,59 @@ export default function EditProfileModal({ user, isOpen, onClose, onSubmit }) {
     }
   };
 
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData(prev => ({ ...prev, [name]: value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    if (!formData.name.trim()) {
-      setError('Name cannot be empty.');
+    let profileUpdated = false;
+    let passwordChanged = false;
+
+    try {
+      // --- Profile Update Logic ---
+      if (formData.name !== user.name || formData.email !== user.email || String(formData.number || '') !== String(user.number || '')) {
+        if (!formData.name.trim()) {
+          throw new Error('Name cannot be empty.');
+        }
+        if (formData.number && formData.number.length !== 10) {
+          throw new Error('Phone number must be exactly 10 digits.');
+        }
+        const payload = { name: formData.name, email: formData.email, number: formData.number ? parseInt(formData.number, 10) : null };
+        const result = await onSubmit(payload);
+        if (result && result.error) throw new Error(result.error);
+        profileUpdated = true;
+      }
+
+      // --- Password Change Logic ---
+      if (passwordData.newPassword) {
+        if (passwordData.newPassword !== passwordData.confirmNewPassword) {
+          throw new Error('New passwords do not match.');
+        }
+        if (!passwordData.currentPassword) {
+          throw new Error('Current password is required to set a new one.');
+        }
+        await apiClient.put('/user/change-password', {
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        });
+        passwordChanged = true;
+      }
+
+      if (profileUpdated || passwordChanged) {
+        onClose(); // Close modal on success
+      } else {
+        setError("No changes were made.");
+      }
+
+    } catch (err) {
+      setError(err.response?.data?.message || err.message);
+    } finally {
       setLoading(false);
-      return;
-    }
-
-    if (formData.number && formData.number.length !== 10) {
-      setError('Phone number must be exactly 10 digits.');
-      setLoading(false);
-      return;
-    }
-    // Add more specific validation if needed (e.g., email format)
-
-    const dataToSubmit = {
-      name: formData.name,
-      email: formData.email,
-      // Convert number back to integer if it's not empty, otherwise null or skip
-      number: formData.number ? parseInt(formData.number, 10) : null,
-    };
-    
-    // Filter out null values if backend doesn't expect them for non-provided fields
-    const payload = Object.fromEntries(Object.entries(dataToSubmit).filter(([_, v]) => v !== null));
-
-
-    const result = await onSubmit(payload); // Pass only relevant fields
-    setLoading(false);
-    if (result && result.error) {
-      setError(result.error);
-    } else if (result && result.success) {
-      onClose();
     }
   };
 
@@ -139,6 +164,47 @@ export default function EditProfileModal({ user, isOpen, onClose, onSubmit }) {
                 className="bg-white/50 border-stone-300 text-stone-900 placeholder-stone-500 focus:ring-stone-500 focus:border-stone-500"
               />
             </div>
+            
+            <div className="border-t border-stone-400/30 pt-4 space-y-4">
+                <h3 className="text-lg font-medium text-stone-700">Change Password</h3>
+                <div>
+                    <Label htmlFor="currentPassword">Current Password</Label>
+                    <InputField
+                        id="currentPassword"
+                        name="currentPassword"
+                        type="password"
+                        value={passwordData.currentPassword}
+                        onChange={handlePasswordChange}
+                        placeholder="Enter your current password"
+                        className="bg-white/50 border-stone-300 text-stone-900 placeholder-stone-500"
+                    />
+                </div>
+                <div>
+                    <Label htmlFor="newPassword">New Password</Label>
+                    <InputField
+                        id="newPassword"
+                        name="newPassword"
+                        type="password"
+                        value={passwordData.newPassword}
+                        onChange={handlePasswordChange}
+                        placeholder="Enter a new password"
+                        className="bg-white/50 border-stone-300 text-stone-900 placeholder-stone-500"
+                    />
+                </div>
+                <div>
+                    <Label htmlFor="confirmNewPassword">Confirm New Password</Label>
+                    <InputField
+                        id="confirmNewPassword"
+                        name="confirmNewPassword"
+                        type="password"
+                        value={passwordData.confirmNewPassword}
+                        onChange={handlePasswordChange}
+                        placeholder="Confirm the new password"
+                        className="bg-white/50 border-stone-300 text-stone-900 placeholder-stone-500"
+                    />
+                </div>
+            </div>
+
             {error && (
               <p className="text-sm text-red-600 bg-red-100/70 p-3 rounded-md border border-red-200/70">{error}</p>
             )}

@@ -11,6 +11,7 @@ export default function EditUserModal({ user, isOpen, onClose, onSubmit }) {
     email: '',
     number: '',
     role: 'USER', // Default role
+    password: '', // Add password field
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -23,6 +24,7 @@ export default function EditUserModal({ user, isOpen, onClose, onSubmit }) {
         email: user.email || '',
         number: user.number ? String(user.number) : '',
         role: user.role || 'USER',
+        password: '', // Reset password field on open
       });
       setError('');
     }
@@ -58,9 +60,10 @@ export default function EditUserModal({ user, isOpen, onClose, onSubmit }) {
       email: formData.email,
       number: formData.number ? parseInt(formData.number, 10) : null,
       role: formData.role,
+      password: formData.password, // Include password
     };
     
-    const payload = Object.fromEntries(Object.entries(dataToSubmit).filter(([_, v]) => v !== null));
+    const payload = Object.fromEntries(Object.entries(dataToSubmit).filter(([_, v]) => v !== null && v !== ''));
 
     const result = await onSubmit(user.username, payload); // Pass username and payload
     setLoading(false);
@@ -124,6 +127,18 @@ export default function EditUserModal({ user, isOpen, onClose, onSubmit }) {
                 value={formData.number}
                 onChange={handleChange}
                 placeholder="Enter 10-digit phone number"
+                className="bg-white/50 border-stone-300 text-stone-900 placeholder-stone-500 focus:ring-stone-500 focus:border-stone-500"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-password">New Password (Optional)</Label>
+              <InputField
+                id="edit-password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Leave blank to keep unchanged"
                 className="bg-white/50 border-stone-300 text-stone-900 placeholder-stone-500 focus:ring-stone-500 focus:border-stone-500"
               />
             </div>
