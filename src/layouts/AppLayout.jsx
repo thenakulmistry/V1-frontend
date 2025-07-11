@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Button from '@/components/common/Button';
 import Notification from '@/components/common/Notification';
 import bgImage from '@/assets/bg9.jpg';
+import apiClient from '@/services/apiClient'; // Import apiClient
 
 export default function AppLayout() {
   const { user, logout, token } = useAuth(); // Added token
@@ -97,19 +98,8 @@ export default function AppLayout() {
         notes: notes
       };
 
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/user/add_order`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(orderDTO)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(`Failed to place order: ${errorData}`);
-      }
+      // Use apiClient to make the request, which correctly constructs the URL and adds headers.
+      await apiClient.post('/user/add_order', orderDTO);
 
       setNotification({ show: true, message: 'Order placed successfully! You will receive a call on your registered number shortly to confirm the details.', type: 'success' });
       setCart([]);
@@ -119,7 +109,7 @@ export default function AppLayout() {
       setIsCartOpen(false); // Close cart after order
     } catch (error) {
       console.error('Error placing order:', error);
-      setNotification({ show: true, message: 'Failed to place order: ' + error.message, type: 'error' });
+      setNotification({ show: true, message: 'Failed to place order: ' + (error.response?.data?.message || error.message), type: 'error' });
     }
   };
 
