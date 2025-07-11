@@ -182,19 +182,8 @@ export default function ProfilePage() {
   // Renamed from handleUpdateUser to be more specific for modal submission
   const handleProfileUpdateSubmit = async (updatedData) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/user`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(updatedData) // Send only name, email, number as prepared by modal
-      });
-
-      if (!response.ok) {
-        const errorResult = await response.json().catch(() => ({ message: 'Update failed' }));
-        throw new Error(errorResult.message || 'Failed to update user profile');
-      }
+      // Use apiClient for consistency and to leverage interceptors
+      await apiClient.put('/user', updatedData);
       
       // Optimistically update context, or fetch user profile again for fresh data
       // For simplicity, optimistic update:
@@ -206,7 +195,7 @@ export default function ProfilePage() {
       return { success: true };
     } catch (error) {
       console.error('Error updating user:', error);
-      setNotification({ show: true, message: `Error updating profile: ${error.message}`, type: 'error' });
+      setNotification({ show: true, message: `Error updating profile: ${error.response?.data?.message || error.message}`, type: 'error' });
       return { success: false, error: error.message };
     }
   };

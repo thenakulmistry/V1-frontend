@@ -6,6 +6,8 @@ import Button from '@/components/common/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/common/Card';
 import AddItemModal from '@/components/admin/AddItemModal';
 import EditItemModal from '@/components/admin/EditItemModal';
+import ConfirmationModal from '@/components/common/ConfirmationModal';
+import Notification from '@/components/common/Notification';
 import apiClient from '@/services/apiClient';
 
 // Simplified Helper to normalize MongoDB ObjectId
@@ -35,6 +37,9 @@ export default function ManageItemsPage() {
   const [isEditItemModalOpen, setIsEditItemModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [expandedTypes, setExpandedTypes] = useState(new Set());
+  const [notification, setNotification] = useState({ show: false, message: '', type: '' });
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
 
   useEffect(() => {
     if (token) {
@@ -93,11 +98,12 @@ export default function ManageItemsPage() {
   const handleAddItemSubmit = async (itemData) => {
     try {
       await apiClient.post('/admin/item', itemData);
-      alert('Item added successfully.');
+      setNotification({ show: true, message: 'Item added successfully.', type: 'success' });
       fetchItems();
       return { success: true };
     } catch (err) {
       console.error('Error adding item:', err);
+      setNotification({ show: true, message: `Error adding item: ${err.response?.data?.message || err.message}`, type: 'error' });
       return { success: false, error: err.response?.data?.message || err.message };
     }
   };
@@ -110,24 +116,33 @@ export default function ManageItemsPage() {
   const handleEditItemSubmit = async (itemId, itemData) => {
     try {
       await apiClient.put(`/admin/item/${itemId}`, itemData);
-      alert('Item updated successfully.');
+      setNotification({ show: true, message: 'Item updated successfully.', type: 'success' });
       fetchItems();
       return { success: true };
     } catch (err) {
       console.error('Error updating item:', err);
+      setNotification({ show: true, message: `Error updating item: ${err.response?.data?.message || err.message}`, type: 'error' });
       return { success: false, error: err.response?.data?.message || err.message };
     }
   };
 
-  const handleDeleteItem = async (itemId, itemName) => {
-    if (!confirm(`Are you sure you want to delete item "${itemName}"?`)) return;
+  const handleDeleteItemClick = (item) => {
+    setItemToDelete(item);
+    setIsConfirmModalOpen(true);
+  };
+
+  const confirmDeleteItem = async () => {
+    if (!itemToDelete) return;
     try {
-      await apiClient.delete(`/admin/item/${itemId}`);
-      alert('Item deleted successfully.');
+      await apiClient.delete(`/admin/item/${itemToDelete.id}`);
+      setNotification({ show: true, message: 'Item deleted successfully.', type: 'success' });
       fetchItems();
     } catch (err) {
-      alert(`Error deleting item: ${err.response?.data?.message || err.message}`);
+      setNotification({ show: true, message: `Error deleting item: ${err.response?.data?.message || err.message}`, type: 'error' });
       console.error(err);
+    } finally {
+      setIsConfirmModalOpen(false);
+      setItemToDelete(null);
     }
   };
 
@@ -212,7 +227,7 @@ export default function ManageItemsPage() {
                                     <Button variant="ghost" size="sm" onClick={() => handleOpenEditModal(item)} className="text-stone-600 hover:text-stone-800 p-1">
                                       <Edit3 size={16}/>
                                     </Button>
-                                    <Button variant="ghost" size="sm" onClick={() => handleDeleteItem(item.id, item.name)} className="text-orange-600 hover:text-orange-800 p-1">
+                                    <Button variant="ghost" size="sm" onClick={() => handleDeleteItemClick(item)} className="text-orange-600 hover:text-orange-800 p-1">
                                        <Trash2 size={16}/>
                                     </Button>
                                   </td>
@@ -244,6 +259,22 @@ export default function ManageItemsPage() {
           isOpen={isEditItemModalOpen}
           onClose={() => { setIsEditItemModalOpen(false); setEditingItem(null); }}
           onSubmit={handleEditItemSubmit}
+        />
+      )}
+      {isConfirmModalOpen && (
+        <ConfirmationModal
+          isOpen={isConfirmModalOpen}
+          onClose={() => setIsConfirmModalOpen(false)}
+          onConfirm={confirmDeleteItem}
+          title="Confirm Deletion"
+          message={`Are you sure you want to delete item "${itemToDelete?.name}"? This action cannot be undone.`}
+        />
+      )}
+      {notification.show && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification({ show: false, message: '', type: '' })}
         />
       )}
     </>
