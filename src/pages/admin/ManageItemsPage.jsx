@@ -149,15 +149,15 @@ export default function ManageItemsPage() {
   return (
     <>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+        <div className="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
           <Link to="/admin/dashboard">
-            <Button variant="ghost" size="sm" className="flex items-center gap-2 text-stone-700 hover:text-stone-900 mb-2 sm:mb-0">
+            <Button variant="ghost" size="sm" className="flex items-center gap-2 text-stone-700 hover:text-stone-900">
               <ArrowLeft size={16} /> Back to Admin Dashboard
             </Button>
           </Link>
           <Button 
             onClick={() => setIsAddItemModalOpen(true)} 
-            className="mt-4 sm:mt-0 bg-stone-800 hover:bg-stone-900 text-white flex items-center gap-2"
+            className="bg-stone-800 hover:bg-stone-900 text-white flex items-center gap-2"
           >
             <PlusCircle size={18} /> Add New Item
           </Button>
@@ -194,11 +194,11 @@ export default function ManageItemsPage() {
                             <thead>
                               <tr className="border-b border-stone-400/30">
                                 {/* <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Image</th> */}
+                                <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Actions</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Name</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Description</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Price</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Available</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Actions</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -215,14 +215,6 @@ export default function ManageItemsPage() {
                                     )}
                                   </td>
                                   */}
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">{item.name}</td>
-                                  <td className="px-6 py-4 text-sm text-stone-700 max-w-xs truncate" title={item.description}>{item.description || 'N/A'}</td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700">₹{item.price?.toFixed(2)}</td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                    <span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${item.available ? 'bg-green-200/70 text-green-900' : 'bg-red-200/70 text-red-900'}`}>
-                                      {item.available ? 'Yes' : 'No'}
-                                    </span>
-                                  </td>
                                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-1">
                                     <Button variant="ghost" size="sm" onClick={() => handleOpenEditModal(item)} className="text-stone-600 hover:text-stone-800 p-1">
                                       <Edit3 size={16}/>
@@ -230,6 +222,14 @@ export default function ManageItemsPage() {
                                     <Button variant="ghost" size="sm" onClick={() => handleDeleteItemClick(item)} className="text-orange-600 hover:text-orange-800 p-1">
                                        <Trash2 size={16}/>
                                     </Button>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">{item.name}</td>
+                                  <td className="px-6 py-4 text-sm text-stone-700 max-w-xs truncate" title={item.description}>{item.description || 'N/A'}</td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700">₹{item.price?.toFixed(2)}</td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                    <span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${item.available ? 'bg-green-200/70 text-green-900' : 'bg-red-200/70 text-red-900'}`}>
+                                      {item.available ? 'Yes' : 'No'}
+                                    </span>
                                   </td>
                                 </tr>
                               ))}

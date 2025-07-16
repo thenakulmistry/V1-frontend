@@ -1,7 +1,7 @@
 // src/layouts/AppLayout.jsx
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link } from 'react-router-dom';
-import { User as UserIconLucide, LogOut, ShoppingCart, X, Plus, Minus } from 'lucide-react'; // Renamed and added icons
+import { User as UserIconLucide, LogOut, ShoppingCart, X, Plus, Minus, Loader } from 'lucide-react'; // Renamed and added icons
 import { useAuth } from '@/contexts/AuthContext';
 import Button from '@/components/common/Button';
 import Notification from '@/components/common/Notification';
@@ -16,6 +16,7 @@ export default function AppLayout() {
   const [requiredByDateTime, setRequiredByDateTime] = useState('');
   const [notes, setNotes] = useState('');
   const [notification, setNotification] = useState({ show: false, message: '', type: '' });
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false); // New state for loading
 
   // Helper to normalize MongoDB ObjectId (can be moved to a utils file)
   const normalizeId = (id) => {
@@ -84,6 +85,7 @@ export default function AppLayout() {
       return;
     }
 
+    setIsPlacingOrder(true); // Start loading
     try {
       const orderDTO = {
         items: cart.map(item => ({
@@ -110,6 +112,8 @@ export default function AppLayout() {
     } catch (error) {
       console.error('Error placing order:', error);
       setNotification({ show: true, message: 'Failed to place order: ' + (error.response?.data?.message || error.message), type: 'error' });
+    } finally {
+      setIsPlacingOrder(false); // Stop loading
     }
   };
 
@@ -297,8 +301,19 @@ export default function AppLayout() {
                   <p className="text-xs text-stone-600 text-center mb-4 italic">
                     *The final price and items are subject to change. You will receive a confirmation call on your registered number to finalize your order.
                   </p>
-                  <Button onClick={placeOrder} className="w-full text-lg py-3 bg-stone-800 hover:bg-stone-900 text-white">
-                    Place Order
+                  <Button
+                    onClick={placeOrder}
+                    className="w-full text-lg py-3 bg-stone-800 hover:bg-stone-900 text-white disabled:bg-stone-400 disabled:cursor-not-allowed"
+                    disabled={!requiredByDateTime || cart.length === 0 || isPlacingOrder}
+                  >
+                    {isPlacingOrder ? (
+                      <span className="flex items-center justify-center">
+                        <Loader className="mr-2 h-5 w-5 animate-spin" />
+                        Placing Order...
+                      </span>
+                    ) : (
+                      'Place Order'
+                    )}
                   </Button>
                 </div>
               </>

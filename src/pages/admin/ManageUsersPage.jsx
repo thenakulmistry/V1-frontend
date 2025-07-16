@@ -121,16 +121,16 @@ export default function ManageUsersPage() {
   return (
     <>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+        <div className="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
           <Link to="/admin/dashboard">
-            <Button variant="ghost" size="sm" className="flex items-center gap-2 text-stone-700 hover:text-stone-900 mb-2 sm:mb-0">
+            <Button variant="ghost" size="sm" className="flex items-center gap-2 text-stone-700 hover:text-stone-900">
               <ArrowLeft size={16} />
               Back to Admin Dashboard
             </Button>
           </Link>
           <Button 
             onClick={handleOpenAddAdminModal} // Changed to open AddAdminModal
-            className="mt-4 sm:mt-0 bg-stone-800 hover:bg-stone-900 text-white flex items-center gap-2" // Changed color for distinction
+            className="bg-stone-800 hover:bg-stone-900 text-white flex items-center gap-2" // Changed color for distinction
           >
             <UserPlus size={18} />
             Add New Admin 
@@ -153,26 +153,17 @@ export default function ManageUsersPage() {
                   <table className="min-w-full">
                     <thead>
                       <tr className="border-b border-stone-400/30">
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Actions</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Name</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Username</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Email</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Phone</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Role</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {users.map((user) => (
                         <tr key={user.id?.$oid || user.id || user.username} className="border-b border-stone-400/30 last:border-b-0 hover:bg-white/10 transition-colors">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">{user.name}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700">{user.username}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700">{user.email || 'N/A'}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700">{user.number || 'N/A'}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">
-                            <span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${user.role === 'ADMIN' ? 'bg-red-200/70 text-red-900' : 'bg-green-200/70 text-green-900'}`}>
-                              {user.role}
-                            </span>
-                          </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-1">
                             <Button variant="ghost" size="sm" onClick={() => handleOpenEditModal(user)} className="text-stone-600 hover:text-stone-800 p-1">
                               <Edit3 size={16}/>
@@ -186,6 +177,15 @@ export default function ManageUsersPage() {
                             >
                                <Trash2 size={16}/>
                             </Button>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">{user.name}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700">{user.username}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700">{user.email || 'N/A'}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700">{user.number || 'N/A'}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm">
+                            <span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${user.role === 'ADMIN' ? 'bg-red-200/70 text-red-900' : 'bg-green-200/70 text-green-900'}`}>
+                              {user.role}
+                            </span>
                           </td>
                         </tr>
                       ))}

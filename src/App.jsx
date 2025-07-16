@@ -109,14 +109,6 @@ function AppContent() {
 
 function App() {
   return (
-    // <QueryClientProvider client={queryClient}>
-    //   <ReactQueryDevtools initialIsOpen={false} />
-    //   <AuthProvider>
-    //     <BrowserRouter>
-    //       <AppContent />
-    //     </BrowserRouter>
-    //   </AuthProvider>
-    // </QueryClientProvider>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <AuthProvider>

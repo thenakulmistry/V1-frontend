@@ -219,34 +219,19 @@ export default function ManageOrdersPage() {
                       <table className="min-w-full">
                         <thead>
                           <tr className="border-b border-stone-400/30">
-                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Order ID</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Username</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Created At</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider bg-yellow-200/50">Required By</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Actions</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Status</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Total Price</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">People</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Status</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Actions</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Username</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider bg-yellow-200/50">Required By</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Created At</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Order ID</th>
                           </tr>
                         </thead>
                         <tbody>
                           {activeOrders.map((order) => (
                             <tr key={order.id} className="border-b border-stone-400/30 last:border-b-0 hover:bg-white/10 transition-colors">
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">#{order.id.slice(-8)}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700">{order.username || 'N/A'}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700">
-                                {order.createdAt ? order.createdAt.toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : 'N/A'}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700 bg-yellow-100/70 font-medium">
-                                {order.requiredByDateTime ? order.requiredByDateTime.toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : 'N/A'}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700">₹{order.totalPrice?.toFixed(2) || '0.00'}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700 text-center">{order.people || 'N/A'}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                <span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.status)}`}>
-                                  {order.status}
-                                </span>
-                              </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-1">
                                 <Button variant="ghost" size="sm" onClick={() => handleViewOrderDetails(order)} className="text-stone-600 hover:text-stone-800 p-1" title="View Details">
                                     <Eye size={16}/>
@@ -255,6 +240,21 @@ export default function ManageOrdersPage() {
                                   <Edit3 size={16}/>
                                 </Button>
                               </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                <span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.status)}`}>
+                                  {order.status}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700">₹{order.totalPrice?.toFixed(2) || '0.00'}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700 text-center">{order.people || 'N/A'}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700">{order.username || 'N/A'}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700 bg-yellow-100/70 font-medium">
+                                {order.requiredByDateTime ? order.requiredByDateTime.toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : 'N/A'}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700">
+                                {order.createdAt ? order.createdAt.toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : 'N/A'}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">#{order.id.slice(-8)}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -271,32 +271,18 @@ export default function ManageOrdersPage() {
                       <table className="min-w-full">
                         <thead>
                           <tr className="border-b border-stone-400/30">
-                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Order ID</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Username</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Created At</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Required By</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Total Price</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Status</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Actions</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Status</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Total Price</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Username</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Required By</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Created At</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-stone-600 uppercase tracking-wider">Order ID</th>
                           </tr>
                         </thead>
                         <tbody>
                           {archivedOrders.map((order) => (
                             <tr key={order.id} className="border-b border-stone-400/30 last:border-b-0 hover:bg-white/10 transition-colors">
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">#{order.id.slice(-8)}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700">{order.username || 'N/A'}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700">
-                                {order.createdAt ? order.createdAt.toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : 'N/A'}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700">
-                                {order.requiredByDateTime ? order.requiredByDateTime.toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : 'N/A'}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700">₹{order.totalPrice?.toFixed(2) || '0.00'}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                <span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.status)}`}>
-                                  {order.status}
-                                </span>
-                              </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-1">
                                 <Button variant="ghost" size="sm" onClick={() => handleViewOrderDetails(order)} className="text-stone-600 hover:text-stone-800 p-1" title="View Details">
                                     <Eye size={16}/>
@@ -305,6 +291,20 @@ export default function ManageOrdersPage() {
                                   <Edit3 size={16}/>
                                 </Button>
                               </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                <span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.status)}`}>
+                                  {order.status}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700">₹{order.totalPrice?.toFixed(2) || '0.00'}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700">{order.username || 'N/A'}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700">
+                                {order.requiredByDateTime ? order.requiredByDateTime.toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : 'N/A'}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-700">
+                                {order.createdAt ? order.createdAt.toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : 'N/A'}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">#{order.id.slice(-8)}</td>
                             </tr>
                           ))}
                         </tbody>

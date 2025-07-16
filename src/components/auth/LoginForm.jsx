@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Button from '@/components/common/Button';
 import InputField from '@/components/common/InputField';
 import { Link } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader } from 'lucide-react';
 import Label from '@/components/common/Label';
 
 // Ensure VITE_GOOGLE_CLIENT_ID is set in your .env file (e.g., .env.local)
@@ -99,7 +99,14 @@ export default function LoginForm() {
         )}
 
         <Button type="submit" disabled={loading} className="w-full">
-          {loading ? 'Signing in...' : 'Sign in'}
+          {loading ? (
+            <span className="flex items-center justify-center">
+              <Loader className="mr-2 h-4 w-4 animate-spin" />
+              Signing in...
+            </span>
+          ) : (
+            'Sign in'
+          )}
         </Button>
       </form>
 
