@@ -103,7 +103,7 @@ export default function EditOrderDetailsModal({ order, isOpen, onClose, onSubmit
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/20 p-4 animate-fadeIn transition-colors duration-200"
     >
       <div 
-        className="bg-white/30 backdrop-blur-xl border border-white/40 text-stone-800 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col animate-fade-in"
+        className="bg-white/80 backdrop-blur-xl border border-white/40 text-stone-800 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col animate-fade-in"
       >
         {/* Modal Header */}
         <div className="flex items-center justify-between p-4 md:p-5 border-b border-stone-300/50 flex-shrink-0">

@@ -76,7 +76,7 @@ export default function EditUserModal({ user, isOpen, onClose, onSubmit }) {
 
   return (
     <div className="fixed inset-0 bg-black/20 flex items-center justify-center p-4 z-[100] animate-fadeIn transition-colors duration-200">
-      <div className="w-full max-w-lg bg-white/30 backdrop-blur-xl border border-white/40 text-stone-800 shadow-2xl rounded-3xl animate-fadeIn flex flex-col max-h-[90vh]">
+      <div className="w-full max-w-lg bg-white/80 backdrop-blur-xl border border-white/40 text-stone-800 shadow-2xl rounded-3xl animate-fadeIn flex flex-col max-h-[90vh]">
         <div className="flex flex-row items-center justify-between p-4 md:p-5 border-b border-stone-300/50 flex-shrink-0">
           <h2 className="text-xl font-semibold text-stone-800">Edit User: {user?.username}</h2>
           <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full text-stone-500 hover:text-stone-700 hover:bg-white/30">

@@ -11,7 +11,7 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
       onClick={onClose}
     >
       <div 
-        className="relative bg-white/30 backdrop-blur-xl border border-white/40 shadow-2xl rounded-3xl max-w-md w-full mx-4 p-6 flex flex-col animate-fadeIn text-stone-800"
+        className="relative bg-white/80 backdrop-blur-xl border border-white/40 shadow-2xl rounded-3xl max-w-md w-full mx-4 p-6 flex flex-col animate-fadeIn text-stone-800"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="text-center">
