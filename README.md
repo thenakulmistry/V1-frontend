@@ -1,8 +1,8 @@
-# Gauri Cooks - Food Ordering Platform
+# Gauri Cooks - Frontend
 
-This is the frontend for "Gauri Cooks", a modern, full-stack food ordering application built with React. It features separate user and admin dashboards, robust authentication, and a responsive, intuitive user interface.
+This is the frontend for "Gauri Cooks", a modern, full-stack food ordering application built with React. It features separate user and admin dashboards, robust authentication, and a responsive, intuitive user interface. The backend code is in a separate repository.
 
-## ✨ Features
+## Features
 
 ### User Features
 - **Authentication**: Secure user registration and login with email/password and Google OAuth2.
@@ -27,7 +27,7 @@ This is the frontend for "Gauri Cooks", a modern, full-stack food ordering appli
 - **API Integration**: Asynchronous communication with the backend API via Axios.
 - **State Management**: Centralized authentication state using React Context.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Framework**: [React](https://reactjs.org/)
 - **Build Tool**: [Vite](https://vitejs.dev/)
@@ -37,7 +37,7 @@ This is the frontend for "Gauri Cooks", a modern, full-stack food ordering appli
 - **State Management**: [React Context](https://reactjs.org/docs/context.html), [TanStack Query](https://tanstack.com/query/latest)
 - **Icons**: [Lucide React](https://lucide.dev/)
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -89,7 +89,7 @@ This is the frontend for "Gauri Cooks", a modern, full-stack food ordering appli
     npm run preview
     ```
 
-## 📜 Available Scripts
+## Available Scripts
 
 In the project directory, you can run:
 
@@ -98,7 +98,7 @@ In the project directory, you can run:
 -   `npm run lint`: Lints the source code using ESLint.
 -   `npm run preview`: Serves the production build locally.
 
-## 📁 Project Structure
+## Project Structure
 
 The project follows a feature-oriented structure:
 
