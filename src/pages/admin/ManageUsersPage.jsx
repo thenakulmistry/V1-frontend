@@ -3,7 +3,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { Users, ArrowLeft, Trash2, Edit3, UserPlus } from 'lucide-react';
 import Button from '@/components/common/Button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/common/Card';
 import EditUserModal from '@/components/admin/EditUserModal';
 import AddAdminModal from '@/components/admin/AddAdminModal'; // Import AddAdminModal
 import ConfirmationModal from '@/components/common/ConfirmationModal';
