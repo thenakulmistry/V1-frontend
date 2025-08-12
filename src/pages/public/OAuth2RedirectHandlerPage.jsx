@@ -5,6 +5,7 @@ import apiClient from '@/services/apiClient'; // Import the new apiClient
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/common/Card';
 import { Loader } from 'lucide-react';
 import Button from '@/components/common/Button';
+import { set } from 'react-hook-form';
 
 // --- IMPORTANT ---
 // Adjust this URL to your actual backend API endpoint for the Google OAuth2 callback.
@@ -25,17 +26,20 @@ function OAuth2RedirectHandlerPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { login } = useAuth(); // Assuming your AuthContext provides a login function
-  const effectRan = useRef(false); // Ref to track if effect has run
+  const [processed, setProcessed] = useState(false);
+  // const effectRan = useRef(false); // Ref to track if effect has run
 
   useEffect(() => {
     // Check if running in development with React.StrictMode
     // or if the effect has already run for other reasons.
-    if (process.env.NODE_ENV === 'development' && effectRan.current) {
-        // In StrictMode, on the second run, effectRan.current will be true.
-        // We only want to proceed if it's the "true" first mount or if effectRan.current is explicitly reset.
-        // For this specific one-time code exchange, we simply return on subsequent runs.
-        return;
-    }
+    // if (process.env.NODE_ENV === 'development' && effectRan.current) {
+    //     // In StrictMode, on the second run, effectRan.current will be true.
+    //     // We only want to proceed if it's the "true" first mount or if effectRan.current is explicitly reset.
+    //     // For this specific one-time code exchange, we simply return on subsequent runs.
+    //     return;
+    // }
+
+    if(processed) return;
 
     const searchParams = new URLSearchParams(location.search);
     const code = searchParams.get('code');
@@ -44,12 +48,14 @@ function OAuth2RedirectHandlerPage() {
     if (errorParam) {
       setError(`Error during OAuth2 authentication: ${errorParam}`);
       setLoading(false);
+      setProcessed(true);
       return;
     }
 
     if (!code) {
       setError('No authorization code found in URL.');
       setLoading(false);
+      setProcessed(true);
       return;
     }
 
@@ -82,20 +88,21 @@ function OAuth2RedirectHandlerPage() {
         setError(err.message || 'An unexpected error occurred during OAuth2 processing.');
       } finally {
         setLoading(false);
+        setProcessed(true);
       }
     };
 
-    if (code) { // Only proceed if code exists
+    // if (code) { // Only proceed if code exists
         exchangeCodeForToken(code);
-    }
+    // }
     
     // Mark that the effect has run (or attempted to run its core logic)
-    if (process.env.NODE_ENV === 'development') {
-        effectRan.current = true;
-    }
+    // if (process.env.NODE_ENV === 'development') {
+    //     effectRan.current = true;
+    // }
 
     // No cleanup needed that would re-trigger or invalidate the one-time code logic
-  }, [location, navigate, login]); // Dependencies remain the same
+  }, [location.search, processed]);
 
   if (loading) {
     return (
