@@ -42,7 +42,30 @@ export const AuthProvider = ({ children }) => {
       }
     }
     setLoading(false);
-  }, []);
+    
+    const handleTokenRefresh = (event) => {
+      const { accessToken, refreshToken: newRefreshToken } = event.detail;
+      setToken(accessToken);
+      if (newRefreshToken) {
+        setRefreshToken(newRefreshToken);
+      }
+    };
+
+    const handleAuthError = () => {
+      setToken(null);
+      setRefreshToken(null);
+      setUser(null);
+      navigate('/login');
+    };
+
+    window.addEventListener('tokenRefreshed', handleTokenRefresh);
+    window.addEventListener('authError', handleAuthError);
+
+    return () => {
+      window.removeEventListener('tokenRefreshed', handleTokenRefresh);
+      window.removeEventListener('authError', handleAuthError);
+    };
+  }, [navigate]);
 
   const login = async (param1, param2, refreshTokenFromLogin) => {
     // param1 can be usernameOrEmail (string) or user object (from OAuth)
@@ -129,14 +152,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
-    setToken(null);
-    setRefreshToken(null);
-    setUser(null);
-    navigate('/login');
+  const logout = async () => {
+    try {
+        // Call backend logout to blacklist token
+        if (token) {
+            await apiClient.post('/user/logout');
+        }
+    } catch (error) {
+        console.error('Logout API call failed:', error);
+        // Continue with local logout even if API call fails
+    } finally {
+        // Always clear local storage
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        setToken(null);
+        setRefreshToken(null);
+        setUser(null);
+        navigate('/login');
+    }
   };
 
   const updateUserContext = (updates) => {

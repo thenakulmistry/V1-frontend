@@ -28,7 +28,11 @@ export default function ForgotPasswordPage() {
 
       setMessage(data.message);
     } catch (err) {
-      setError(err.response?.data?.message || err.message);
+      if (err.response?.status === 429) {
+        setError('Too many requests. Please wait a minute before trying again.');
+      } else {
+        setError(err.response?.data?.message || err.message);
+      }
     } finally {
       setLoading(false);
     }

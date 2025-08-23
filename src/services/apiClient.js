@@ -61,33 +61,45 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       const refreshToken = localStorage.getItem('refreshToken');
-      if (!refreshToken) {
-        // No refresh token available, logout
-        isRefreshing = false;
-        window.dispatchEvent(new CustomEvent('auth-error-logout'));
-        return Promise.reject(error);
-      }
 
-      try {
-        const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/public/refresh-token`, {
-          refresh_token: refreshToken,
-        });
+      if(refreshToken){
+        try {
+          const response = await apiClient.post('/public/refresh-token', {
+            refresh_token: refreshToken,
+          });
 
-        const newAccessToken = data.accessToken;
-        localStorage.setItem('authToken', newAccessToken);
-        apiClient.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
-        originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
-        
-        processQueue(null, newAccessToken);
-        return apiClient(originalRequest);
+          const { accessToken, refreshToken: newRefreshToken } = response.data;
 
-      } catch (refreshError) {
-        processQueue(refreshError, null);
-        // Refresh token failed, logout
-        window.dispatchEvent(new CustomEvent('auth-error-logout'));
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
+          // Update both tokens
+          localStorage.setItem('authToken', accessToken);
+          if (newRefreshToken) {
+            localStorage.setItem('refreshToken', newRefreshToken);
+          }
+
+          // Dispatch event with both tokens
+          window.dispatchEvent(new CustomEvent('tokenRefreshed', {
+            detail: { accessToken, refreshToken: newRefreshToken }
+          }));
+
+          processQueue(null, accessToken);
+
+          originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
+          return apiClient(originalRequest);
+        } catch(refreshError){
+          processQueue(refreshError, null);
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+          window.dispatchEvent(new CustomEvent('auth-error'));
+          return Promise.reject(refreshError);
+        } finally{
+          isRefreshing = false;
+        }
+      } else {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        window.dispatchEvent(new CustomEvent('auth-error'));
       }
     }
 
