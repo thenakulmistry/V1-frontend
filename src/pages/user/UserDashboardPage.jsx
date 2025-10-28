@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom'; // Added useOutletContext
-import { Package, Plus } from 'lucide-react';
+import { Package, Plus, Minus } from 'lucide-react'; // Add Minus
 import { useAuth } from '@/contexts/AuthContext';
 import Button from '@/components/common/Button';
 import apiClient from '@/services/apiClient';
 
 export default function UserDashboardPage() {
   const { user, token, logout } = useAuth();
-  const { addToCart: contextAddToCart } = useOutletContext(); // Get addToCart from context
+  const { cart, addToCart, updateCartQuantity } = useOutletContext(); // Get cart and functions from context
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -33,6 +33,12 @@ export default function UserDashboardPage() {
     // Fallback for any other type, though less expected for IDs now
     // console.warn('DashboardPage: normalizeId encountered an unexpected ID type. Converting to string:', id);
     return String(id);
+  };
+
+  const getItemQuantity = (itemId) => {
+    const normalizedItemId = normalizeId(itemId);
+    const itemInCart = cart.find(item => normalizeId(item.id) === normalizedItemId);
+    return itemInCart ? itemInCart.quantity : 0;
   };
 
   const groupedItems = items.reduce((acc, item) => {
@@ -130,14 +136,32 @@ export default function UserDashboardPage() {
                             </div>
                             <div className="flex items-center justify-between w-full sm:w-auto sm:justify-end">
                               <span className="text-xl font-bold text-stone-900 sm:mr-6">₹{item.price?.toFixed(2)}</span>
-                              <Button
-                                size="sm"
-                                onClick={() => contextAddToCart(item)}
-                                className="flex items-center gap-1"
-                              >
-                                <Plus size={14} />
-                                Add to Cart
-                              </Button>
+                              {getItemQuantity(item.id) === 0 ? (
+                                <Button
+                                  size="sm"
+                                  onClick={() => addToCart(item)}
+                                  className="flex items-center gap-1 w-[120px] justify-center"
+                                >
+                                  <Plus size={14} />
+                                  Add to Cart
+                                </Button>
+                              ) : (
+                                <div className="flex items-center justify-between w-[120px] h-9 px-2 rounded-md bg-stone-900 text-white shadow-sm">
+                                  <button
+                                    onClick={() => updateCartQuantity(item.id, getItemQuantity(item.id) - 1)}
+                                    className="w-8 h-8 rounded-md flex items-center justify-center text-white/80 hover:bg-white/20"
+                                  >
+                                    <Minus size={16} />
+                                  </button>
+                                  <span className="font-bold text-lg">{getItemQuantity(item.id)}</span>
+                                  <button
+                                    onClick={() => updateCartQuantity(item.id, getItemQuantity(item.id) + 1)}
+                                    className="w-8 h-8 rounded-md flex items-center justify-center text-white/80 hover:bg-white/20"
+                                  >
+                                    <Plus size={16} />
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           </div>
                         ))}
